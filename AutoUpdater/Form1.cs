@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Ionic.Zip;
 
 namespace AutoUpdater
 {
@@ -173,12 +174,20 @@ namespace AutoUpdater
                     if (File.Exists("CrossAuto.exe"))
                         File.Delete("CrossAuto.exe");
                 }
+                ReadOptions options = new ReadOptions();
+                options.Encoding = Encoding.Default;
 
-                ZipFile.ExtractToDirectory(fileName, "CrossAuto");
+                using (Ionic.Zip.ZipFile zip = Ionic.Zip.ZipFile.Read(fileName, options))
+                {
+                    foreach (ZipEntry e in zip)
+                    {
+                        e.Extract(extractedDirectory, ExtractExistingFileAction.OverwriteSilently);
+                    }
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                MessageBox.Show("解壓縮失敗了: " + e.ToString());
             }
 
             WriteVersion(newestVersion);
